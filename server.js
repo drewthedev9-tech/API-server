@@ -1,6 +1,11 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+
 
 const app = express();
+// nodyParser is a middleware  
+app.use(bodyParser.json());
+
 
 // temporary database
 const database = {
@@ -30,14 +35,14 @@ const database = {
     ]
 }
 
-
+// get request to see if front end is talking to server.
 app.get('/', (req, res)=>{
     res.send('this is working ')
 })
 
-// sign in 
-// front end enters stuff and matched up things with 
-// users in the data base.
+//sign -- POST successful/fail.
+// sign in to handle the sign inswith the database above.
+
 app.post('/signin', (req, res)=>{
     if(req.body.email === database.users[0].email && 
         req.body.password === database.users[0].password){
@@ -48,6 +53,10 @@ app.post('/signin', (req, res)=>{
     res.json('signing')
 })
 
+// register --> POST = user.
+
+
+
 app.listen (3000, ()=> {
     console.log('app is running on port 3000')
 })
@@ -56,7 +65,7 @@ app.listen (3000, ()=> {
 
 /-- res = this is working
 
-/sign -- POST successful/fail.
+
 
 register --> POST = user
 
