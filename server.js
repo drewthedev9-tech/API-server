@@ -9,7 +9,7 @@ const profile = require('./controllers/profile');
 const image = require('./controllers/image');
 
 
-// connecting to database test:
+// connecting to database:
 const db = knex({
     client: 'pg',
     connection: {
