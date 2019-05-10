@@ -3,16 +3,18 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require ('knex');
-const register = require('./controllers/register')
+const register = require('./controllers/register');
+const signin = require('./controllers/signin');
+const profile = require('./controllers/profile');
+const image = require('./controllers/image');
 
-// connecting to database:
+
+// connecting to database test:
 const db = knex({
     client: 'pg',
     connection: {
-      host : '127.0.0.1',
-      user : 'andrew',
-      password : 'andrew',
-      database : 'smartbrain'
+      connectionString : process.env.DATABASE_URL,
+      ssl: 'true',
     }
   });
 
@@ -39,73 +41,22 @@ app.get('/', (req, res)=>{
 //sign -- POST successful/fail.
 // sign in to handle the sign inswith the database above.
 
-app.post('/signin', (req, res)=>{
-    // knes.js for selecting from the database.
-   db.select('email', 'hash').from('login')
-//    checks email.
-   .where('email', '=', req.body.email)
-    .then(data =>{
-   const isValid =  bcrypt.compareSync(req.body.password,data[0].hash);
-   if ( isValid){
-      return db.select('*').from('users')
-        .where('email', '=', req.body.email)
-        .then(user =>{
-            res.json(user[0])
-        })
-        .catch(err => res.status(400).json('unable to get user'))
-        } else {
-            res.status(400).json('wrong credentials')
-        }
-        
-    })
-    .catch(err=> res.status(400).json('wrong credentials'))
-})
-
+app.post('/signin', (req, res)=> {signin.handleSignin(req, res,db, bcrypt)})
 // register --> POST = user.
 // registering to a new user so adding to the database.
+// register function is in teh controllers file pushing these parameters to to the 
+// function.
 app.post('/register', (req, res)=>{register.handleRegister(req, res,db, bcrypt)})
 
 // matching id endpoint to get user.
-app.get('/profile/:id', (req, res)=>{
-    // recieve user from the databse there fore needs params.
-    const { id } =req.params;
+app.get('/profile/:id', (req, res)=>{profile.handelProfileGet(req, res,db)})
   
-    //knex for grabbing the profile
-   db.select('*').from('users').where({id})
-    .then(user=>{
-        // if useres length array id not the 1st user ina rray then display
-        // nof found
-        if(user.length){
-            res.json(user[0]);
-            // 
-        } else {
-                res.status(400).json('not found')
-        }
-        })
-        .catch(err => res.status(400).json('error getting user'))
-    })
-  
-   
+   // increse their entries count
+app.put('/image',(req,res)=> {image.handleImage(req,res,db)})
+app.post('/imageUrl',(req,res)=> {image.handleApiCall(req,res)})
 
 
-// increse their entries count
-app.put('/image',(req, res)=>{
-    const { id } =req.body;
-    // KNEX update and ncrement functions
-   db('users').where ('id', '=', id)
-   .increment('entries', 1)
-   .returning('entries')
-   .then(entries =>{
-        res.json(entries[0]);
-   })
-   .catch(err => res.status(400).json('unable to update entries'))
-   })
-
-
-
-
-
-app.listen (3000, ()=> {
-    console.log('app is running on port 3000')
+app.listen (process.env.PORT || 3000, ()=> {
+    console.log(`app is running on port ${process.env.PORT}`)
 })
 
