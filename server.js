@@ -37,7 +37,7 @@ app.use(cors());
 // get request to see if front end is talking to server.
 app.get('/', (req, res)=>{
     // respnding with the user database after they are updated.
-    res.send(database.users)
+    res.send('it is working')
 })
 
 //sign -- POST successful/fail.
